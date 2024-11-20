@@ -1,11 +1,11 @@
-./vscode
+vscode
 # sample executed files
-./Project/src/dbConnector/test_ConnectDB
-./Project/src/dbConnector/test_mysql
+Project/src/dbConnector/test_ConnectDB
+Project/src/dbConnector/test_mysql
 
 # executed client server file
-./Project/src/client
-./Project/src/server
+Project/src/client
+Project/src/server
 
 # test folder
-./Sample/
+Sample/

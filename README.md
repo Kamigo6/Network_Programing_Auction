@@ -1,3 +1,16 @@
+**DOCKER:**
+Install docker
+
+Create docker container for database:
+```
+docker compose up -d
+```
+
+Shutdown docker container:
+```
+docker compose down -v
+```
+**DATABASE CONNECTION:**
 Install mysql connector/C++:
 ```shell
 sudo apt-get install libmysqlcppconn-dev
