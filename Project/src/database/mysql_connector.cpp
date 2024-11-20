@@ -53,11 +53,10 @@ int MySQLOperations::checkUser(const string &countQuery)
     try
     {
         sql::ResultSet *res = stmt->executeQuery(countQuery);
-        cout << res->getInt(1);
         if (res->next()) {
-            return 1;
+            return 0;
         }
-        else return 0;
+        else return 1;
     }
     catch (SQLException &e)
     {

@@ -54,8 +54,8 @@ enum ServerResponse {
 };
 
 enum AuthCode {
-    FAIL = 0,
-    SUCCESS = 1
+    FAIL = 1,
+    SUCCESS = 0
 };
 
 #endif // ENUMS_H

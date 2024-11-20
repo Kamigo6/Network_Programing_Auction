@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <signal.h>
-#include "dbConnector/mysql_connector.h"
+#include "database/mysql_connector.h"
 #include "enums.h"
 #include "DBstruct.h"
 
