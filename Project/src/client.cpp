@@ -96,7 +96,7 @@ void displayMenu()
                 break;
 
             case '3':
-                printf("Goodbye!\n");
+                printf("***Application Ended***\n");
                 exit(0);
                 break;
             default:
@@ -120,7 +120,7 @@ void displayMenu()
 
 void displayUserMenu(string *username)
 {
-    cout << "Hello: " << *username << "\n What do you want to do?\n";
+    cout << "Account: " << *username << "\n ============Main Menu============\n";
     printf("1. View rooms\n");
     printf("2. View items\n");
     printf("3. View log\n");
@@ -130,24 +130,21 @@ void displayUserMenu(string *username)
     string choice;
     cin >> choice;
 
-    // switch (choice[0])
-    // {
-    // case '1':
-    //     searchMovie();
-    //     break;
-    // case '2':
-    //     browseMovie();
-    //     break;
-    // case '3':
-    //     bookTicket();
-    //     break;
-    // case '4':
-    //     logout();
-    //     break;
-    // default:
-    //     printf("Invalid choice. Try again.\n");
-    //     break;
-    // }
+    switch (choice[0])
+    {
+    case '1':
+        break;
+    case '2':
+        break;
+    case '3':
+        break;
+    case '4':
+        logout();
+        break;
+    default:
+        printf("Invalid choice. Try again.\n");
+        break;
+    }
 }
 
 void _register()
@@ -166,12 +163,12 @@ void _register()
     send(socketfd, sendline, strlen(sendline), 0);
 
     recv(socketfd, recvline, MAXLINE, 0);
-    int auth = recvline[0] - '0';
-    if (auth == SUCCESS)
+    int status = recvline[0] - '0';
+    if (status == SUCCESS)
     {
         printf("Register successfully!\nNow you can login with this new account.\n");
     }
-    else if (auth == FAIL)
+    else if (status == FAIL)
     {
         printf("This username already existed!!!\n");
     }
@@ -199,13 +196,13 @@ int login(string *user)
     send(socketfd, sendline, strlen(sendline), 0);
 
     recv(socketfd, recvline, MAXLINE, 0);
-    int auth = recvline[0] - '0';
-    if (auth == SUCCESS)
+    int status = recvline[0] - '0';
+    if (status == SUCCESS)
     {
         printf("You have logged in successfully!\n");
         *user = username;
     }
-    else if (auth == FAIL)
+    else if (status == FAIL)
     {
         printf("Wrong username or password!!!\n");
     }
@@ -214,7 +211,7 @@ int login(string *user)
         perror(recvline);
         exit(4);
     }
-    return auth;
+    return status;
 }
 
 void logout()

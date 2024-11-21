@@ -10,7 +10,7 @@
 #include <signal.h>
 #include "database/mysql_connector.h"
 #include "enums.h"
-#include "DBstruct.h"
+#include "model.h"
 
 #define MAXLINE 4096   // max text line length
 #define SERV_PORT 3000 // port
@@ -223,7 +223,7 @@ void initServer()
 
 int _register(MySQLOperations *mysqlOps, string username, string password)
 {
-    string sql = "INSERT INTO users(username, password) VALUES ('" + username + "','" + password + "');";
+    string sql = "INSERT INTO user(name, password) VALUES ('" + username + "','" + password + "');";
     bool res = (*mysqlOps).insertRecords(sql);
     cout << "SQL query: " << sql << '\n';
     if (res)

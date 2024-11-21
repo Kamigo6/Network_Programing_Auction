@@ -1,5 +1,5 @@
 #include "mysql_connector.h"
-#include "../DBstruct.h"
+#include "../model.h"
 #include <string.h>
 
 MySQLOperations::MySQLOperations()
@@ -34,29 +34,15 @@ bool MySQLOperations::connect(const string &ipAddress, const string &username, c
     return false;
 }
 
-bool MySQLOperations::createTableIfNotExists(const string &createTableQuery)
-{
-    try
-    {
-        stmt->execute(createTableQuery);
-        return true;
-    }
-    catch (SQLException &e)
-    {
-        cerr << "Error creating table: " << e.what() << endl;
-    }
-    return false;
-}
-
 int MySQLOperations::checkUser(const string &countQuery)
 {
     try
     {
         sql::ResultSet *res = stmt->executeQuery(countQuery);
         if (res->next()) {
-            return 0;
+            return 1;
         }
-        else return 1;
+        else return 0;
     }
     catch (SQLException &e)
     {

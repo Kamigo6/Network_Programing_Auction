@@ -33,7 +33,7 @@ g++ -o testConnectDB testConnectDB.cpp -lmysqlcppconn
 #### server
 
 ```bash
-g++ -o server server.cpp DBstruct.cpp database/mysql_connector.cpp -lmysqlcppconn
+g++ -o server server.cpp model.cpp database/mysql_connector.cpp -lmysqlcppconn
 ./server
 ```
 

@@ -1,5 +1,5 @@
-#ifndef DBSTRUCT_H
-#define DBSTRUCT_H
+#ifndef MODEL_H
+#define MODEL_H
 
 // Structure for User
 struct User {

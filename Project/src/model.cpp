@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "DBstruct.h"
+#include "model.h"
 
 // RoomList functions
 void initRoomList(struct RoomList *roomList) {

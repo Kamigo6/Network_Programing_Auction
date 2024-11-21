@@ -1,7 +1,6 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-// Replace these fields to match with your database
 const char * database = "auctionDb";
 const char * username = "root";
 const char * password = "123";
@@ -53,9 +52,9 @@ enum ServerResponse {
     VIEW_USER_LOG_RES = 20
 };
 
-enum AuthCode {
-    FAIL = 1,
-    SUCCESS = 0
+enum StatusCode {
+    FAIL = 0,
+    SUCCESS = 1
 };
 
 #endif // ENUMS_H
