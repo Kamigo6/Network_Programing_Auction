@@ -23,8 +23,8 @@ int child_process_running = 1;
 
 void sig_chld(int signo);
 void initServer();
-void log_recv_msg(string client_ip, int client_port, string buf);
-void log_send_msg(int connfd, string client_ip, int client_port, char response[]);
+void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req);
+void log_send_msg(int connfd, string client_ip, int client_port, char response[], ServerResponse res);
 int _register(MySQLOperations *mysqlOps, string username, string password);
 int login(MySQLOperations *mysqlOps, string username, string password);
 
@@ -83,8 +83,6 @@ int main(int argc, char **argv)
                     exit(0);
                 }
 
-                log_recv_msg(client_ip, client_port, buf);
-
                 int cmd = 0;
 
                 for (int i = 0; i < strlen(buf); i++)
@@ -99,6 +97,9 @@ int main(int argc, char **argv)
                     }
                     cmd = cmd * 10 + (int)(digit - '0');
                 }
+
+                log_recv_msg(client_ip, client_port, buf, static_cast<UserRequest>(cmd));
+                
                 switch (cmd)
                 {
                 case REGISTER_REQ:
@@ -110,13 +111,13 @@ int main(int argc, char **argv)
                         int result = _register(&mysqlOps, username, password);
                         response[0] = '0' + result;
                         response[1] = '\0';
-                        log_send_msg(connfd, client_ip, client_port, response);
+                        log_send_msg(connfd, client_ip, client_port, response, REGISTER_RES);
                     }
                     else
                     {
                         printf("[-]Invalid register protocol! %s\n", buf);
                         sprintf(response, "Invalid register protocol!\n");
-                        log_send_msg(connfd, client_ip, client_port, response);
+                        log_send_msg(connfd, client_ip, client_port, response, REGISTER_RES);
                     }
                     break;
                 }
@@ -129,13 +130,13 @@ int main(int argc, char **argv)
                         int result = login(&mysqlOps, username, password);
                         response[0] = '0' + result;
                         response[1] = '\0';
-                        log_send_msg(connfd, client_ip, client_port, response);
+                        log_send_msg(connfd, client_ip, client_port, response, LOGIN_RES);
                     }
                     else
                     {
                         printf("[-]Invalid login protocol! %s\n", buf);
                         sprintf(response, "Invalid login protocol!\n");
-                        log_send_msg(connfd, client_ip, client_port, response);
+                        log_send_msg(connfd, client_ip, client_port, response, LOGIN_RES);
                     }
                     break;
                 }
@@ -144,7 +145,7 @@ int main(int argc, char **argv)
                     char response[50];
                     printf("[-]Invalid protocol: wrong command code\n\n");
                     sprintf(response, "Invalid  protocol: wrong command code\n");
-                    log_send_msg(connfd, client_ip, client_port, response);
+                    log_send_msg(connfd, client_ip, client_port, response, static_cast<ServerResponse>(-1));
                 }
                 }
 
@@ -160,12 +161,12 @@ int main(int argc, char **argv)
     close(connfd);
 }
 
-void log_recv_msg(string client_ip, int client_port, string buf)
+void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req)
 {
-    cout << "[+]Received message from " << client_ip << ":" << client_port << " - " << buf << endl;
+    cout << "[+]Received message from " << client_ip << ":" << client_port << "\n" << UserRequestToString(req) << "\n" << buf << endl;
 }
 
-void log_send_msg(int connfd, string client_ip, int client_port, char response[])
+void log_send_msg(int connfd, string client_ip, int client_port, char response[], ServerResponse res)
 {
     int n = send(connfd, response, MAXLINE, 0);
     if (n < 0)
@@ -173,7 +174,7 @@ void log_send_msg(int connfd, string client_ip, int client_port, char response[]
         perror("Send error");
         exit(1);
     }
-    cout << "[+]Sent message to " << client_ip << ":" << client_port << " - " << response << '\n';
+    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n" << ServerResponseToString(res) << "\n" << response <<  '\n';
 }
 
 void sig_chld(int signo)
