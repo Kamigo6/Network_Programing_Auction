@@ -23,7 +23,7 @@ public:
 
     // Connect to the database
     bool connect(const string& ipAddress, const string& username, const string& password, const string& database);
-    int checkUser(const string &countQuery);
+    int checkRecord(const string &countQuery);
 
     // Generic functions
     bool createTableIfNotExists(const string& createTableQuery);

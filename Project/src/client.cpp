@@ -164,13 +164,17 @@ void _register()
 
     recv(socketfd, recvline, MAXLINE, 0);
     int status = recvline[0] - '0';
-    if (status == SUCCESS)
+    if (status == 1) // SUCCESS
     {
         printf("Register successfully!\nNow you can login with this new account.\n");
     }
-    else if (status == FAIL)
+    else if (status == 2) // ALREADY EXISTED
     {
         printf("This username already existed!!!\n");
+    }
+    else if (status == 0) // FAIL
+    {
+        printf("Registration failed!!!\n");
     }
     else
     {

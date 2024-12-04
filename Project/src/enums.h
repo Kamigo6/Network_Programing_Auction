@@ -9,7 +9,7 @@ const char * ipAddress = "tcp://127.0.0.1:3309";
 enum UserRequest {
     LOGIN_REQ = 1,
     REGISTER_REQ = 2,
-    VIEW_ALL_ROOMS_REQ = 3,
+    VIEW_ROOMS_REQ = 3,
     CREATE_ROOM_REQ = 4,
     VIEW_ROOM_LOG_REQ = 5,
     PLACE_ITEM_IN_ROOM_REQ = 6,

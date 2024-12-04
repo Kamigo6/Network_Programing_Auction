@@ -223,20 +223,32 @@ void initServer()
 
 int _register(MySQLOperations *mysqlOps, string username, string password)
 {
+    // Check if the username already exists
+    string checkSql = "SELECT * FROM user WHERE name = '" + username + "';";
+    cout << "SQL query: " << checkSql << '\n';
+    int checkRes = (*mysqlOps).checkRecord(checkSql);
+    
+    if (checkRes == 1)
+    {
+        cout << "[-]Username already exists." << endl;
+        return 2;
+        // Already existed
+    }
+    
     string sql = "INSERT INTO user(name, password) VALUES ('" + username + "','" + password + "');";
     bool res = (*mysqlOps).insertRecords(sql);
     cout << "SQL query: " << sql << '\n';
     if (res)
-        return SUCCESS;
+        return 1; // SUCCESS
     else
-        return FAIL;
+        return 0; // FAIL
 }
 
 int login(MySQLOperations *mysqlOps, string username, string password)
 {
-    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND password = '" + password + "';";
+    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND password = '" + password + "'" +"AND login == 0;";
     cout << "SQL query: " << sql << '\n';
-    int res = (*mysqlOps).checkUser(sql);
+    int res = (*mysqlOps).checkRecord(sql);
     if (res == SUCCESS)
         return SUCCESS;
     else

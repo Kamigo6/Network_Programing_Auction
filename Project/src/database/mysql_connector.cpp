@@ -34,7 +34,7 @@ bool MySQLOperations::connect(const string &ipAddress, const string &username, c
     return false;
 }
 
-int MySQLOperations::checkUser(const string &countQuery)
+int MySQLOperations::checkRecord(const string &countQuery)
 {
     try
     {
