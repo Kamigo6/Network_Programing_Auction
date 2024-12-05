@@ -12,7 +12,7 @@ enum UserRequest {
     REGISTER_REQ = 3,
     VIEW_ROOMS_REQ = 4,
     CREATE_ROOM_REQ = 5,
-    VIEW_ROOM_OWNED_REQ = 6,
+    VIEW_ROOMS_OWNED_REQ = 6,
     VIEW_ROOM_LOG_REQ = 7,
     PLACE_ITEM_IN_ROOM_REQ = 8,
     ACCEPT_REJECT_ITEM_REQ = 9,
@@ -37,7 +37,7 @@ enum ServerResponse {
     REGISTER_RES = 3,
     VIEW_ROOMS_RES = 4,
     CREATE_ROOM_RES = 5,
-    VIEW_ROOM_OWNED_RES = 6,
+    VIEW_ROOMS_OWNED_RES = 6,
     VIEW_ROOM_LOG_RES = 7,
     PLACE_ITEM_IN_ROOM_RES = 8,
     ACCEPT_REJECT_ITEM_RES = 9,
@@ -68,7 +68,7 @@ const char* UserRequestToString(UserRequest req) {
         case REGISTER_REQ: return "REGISTER_REQ";
         case VIEW_ROOMS_REQ: return "VIEW_ROOMS_REQ";
         case CREATE_ROOM_REQ: return "CREATE_ROOM_REQ";
-        case VIEW_ROOM_OWNED_REQ: return "VIEW_ROOM_OWNED_REQ";
+        case VIEW_ROOMS_OWNED_REQ: return "VIEW_ROOM_OWNED_REQ";
         case VIEW_ROOM_LOG_REQ: return "VIEW_ROOM_LOG_REQ";
         case PLACE_ITEM_IN_ROOM_REQ: return "PLACE_ITEM_IN_ROOM_REQ";
         case ACCEPT_REJECT_ITEM_REQ: return "ACCEPT_REJECT_ITEM_REQ";
@@ -96,7 +96,7 @@ const char* ServerResponseToString(ServerResponse res) {
         case REGISTER_RES: return "REGISTER_RES";
         case VIEW_ROOMS_RES: return "VIEW_ROOMS_RES";
         case CREATE_ROOM_RES: return "CREATE_ROOM_RES";
-        case VIEW_ROOM_OWNED_RES: return "VIEW_ROOM_OWNED_RES";
+        case VIEW_ROOMS_OWNED_RES: return "VIEW_ROOM_OWNED_RES";
         case VIEW_ROOM_LOG_RES: return "VIEW_ROOM_LOG_RES";
         case PLACE_ITEM_IN_ROOM_RES: return "PLACE_ITEM_IN_ROOM_RES";
         case ACCEPT_REJECT_ITEM_RES: return "ACCEPT_REJECT_ITEM_RES";

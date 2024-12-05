@@ -30,6 +30,7 @@ int login(MySQLOperations *mysqlOps, string username, string password, int &user
 int logout(MySQLOperations *mysqlOps, string username);
 int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name);
 void viewRooms(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps);
+void viewRoomsOwned(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps, int user_id);
 
 int main(int argc, char **argv)
 {
@@ -195,6 +196,23 @@ int main(int argc, char **argv)
                         printf("[-]Invalid view rooms protocol! %s\n", buf);
                         sprintf(response, "Invalid view rooms protocol!\n");
                         log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_RES);
+                    }
+                    break;
+                }
+                case VIEW_ROOMS_OWNED_REQ:
+                {
+                    char response[50];
+                    int user_id;
+                    int noargs = sscanf(buf, "%d\n%d\n", &cmd, &user_id);
+                    if (noargs == 2)
+                    {
+                        viewRoomsOwned(connfd, client_ip, client_port, &mysqlOps, user_id);
+                    }
+                    else
+                    {
+                        printf("[-]Invalid view rooms owned protocol! %s\n", buf);
+                        sprintf(response, "Invalid view rooms owned protocol!\n");
+                        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_OWNED_RES);
                     }
                     break;
                 }
@@ -413,6 +431,54 @@ void viewRooms(int connfd, string client_ip, int client_port, MySQLOperations *m
         log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_RES);
         // sprintf(sendline, "Number of rooms matched: %d\n", roomList.size);
         // log_send_msg(connfd, client_ip, client_port, sendline);
+
+        send(connfd, "================================================\n", MAXLINE, 0);
+        sprintf(sendline, "%-10s | %-20s | %-10s |\n", "Room id", "Room name", "Owner id");
+        log_send_msg(connfd, client_ip, client_port, sendline);
+        memset(sendline, 0, strlen(sendline));
+        send(connfd, "-------------------------------------------------\n", MAXLINE, 0);
+        for (int i = 0; i < roomList.size; i++)
+        {
+            struct Room room = roomList.rooms[i];
+            sprintf(sendline, "%-10d | %-20s | %-10d |\n", room.room_id, room.name, room.owner_id);
+            log_send_msg(connfd, client_ip, client_port, sendline);
+            memset(sendline, 0, MAXLINE);
+        }
+        send(connfd, "================================================\n", MAXLINE, 0);
+        usleep(500000);
+        sprintf(sendline, "%s", END);
+        log_send_msg(connfd, client_ip, client_port, sendline);
+        memset(sendline, 0, strlen(sendline));
+        printf("[+]Send completely!\n");
+    }
+    freeRoomList(&roomList);
+}
+
+void viewRoomsOwned(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps, int user_id)
+{
+    string sql = "SELECT * FROM room WHERE owner_id = " + to_string(user_id) + ";";
+    cout << "SQL query: " << sql << '\n';
+
+    struct RoomList roomList;
+    initRoomList(&roomList);
+    mysqlOps->getRoomList(&roomList, sql);
+
+    char sendline[MAXLINE], response[10];
+    char END[10] = "End";
+
+    if (!roomList.size)
+    {
+        response[0] = '0' + FAIL;
+        response[1] = '\0';
+        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_OWNED_RES);
+        return;
+    }
+    else
+    {
+        printf("[+]Begin send response...\n");
+        response[0] = '0' + SUCCESS;
+        response[1] = '\0';
+        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_OWNED_RES);
 
         send(connfd, "================================================\n", MAXLINE, 0);
         sprintf(sendline, "%-10s | %-20s | %-10s |\n", "Room id", "Room name", "Owner id");

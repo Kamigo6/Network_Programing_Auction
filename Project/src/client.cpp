@@ -28,7 +28,8 @@ bool isInteger(const string &s);
 bool isValidTicketFormat(string tickets);
 void logout(string username);
 void createRoom();
-void viewRooms();  
+void viewRooms();
+void viewRoomsOwned();
 
 int main(int argc, char **argv)
 {
@@ -141,6 +142,7 @@ void displayUserMenu(string *username)
         createRoom();
         break;
     case '3':
+        viewRoomsOwned();
         break;
     case '4':
         logout(*username);
@@ -315,6 +317,31 @@ void createRoom()
     else if (status == 2) // Already existed
     {
         printf("Room name already existed!!!\n");
+    }
+    else
+    {
+        perror(recvline);
+        exit(4);
+    }
+}
+
+void viewRoomsOwned()
+{
+    char sendline[MAXLINE], recvline[MAXLINE];
+    int n;
+
+    sprintf(sendline, "%d\n%d\n", VIEW_ROOMS_OWNED_REQ, user_id);
+    send(socketfd, sendline, strlen(sendline), 0);
+
+    recv(socketfd, recvline, MAXLINE, 0);
+    int status = recvline[0] - '0';
+    if (status == SUCCESS)
+    {
+        displayListMessage(&socketfd);
+    }
+    else if (status == FAIL)
+    {
+        printf("Fail to get list of owned rooms!\n");
     }
     else
     {
