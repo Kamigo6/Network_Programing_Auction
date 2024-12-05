@@ -19,7 +19,7 @@ void displayMenu();
 void displayUserMenu(string *username);
 int login(string *username, int &user_id);
 void _register();
-void displayReceiveMessage(int *socketfd);
+void displayListMessage(int *socketfd);
 void searchMovie();
 void browseMovie();
 void bookTicket();
@@ -28,6 +28,7 @@ bool isInteger(const string &s);
 bool isValidTicketFormat(string tickets);
 void logout(string username);
 void createRoom();
+void viewRooms();  
 
 int main(int argc, char **argv)
 {
@@ -134,6 +135,7 @@ void displayUserMenu(string *username)
     switch (choice[0])
     {
     case '1':
+        viewRooms();
         break;
     case '2':
         createRoom();
@@ -244,7 +246,7 @@ void logout(string username)
     }
 }
 
-void displayReceiveMessage(int *socketfd)
+void displayListMessage(int *socketfd)
 {
     char recvline[MAXLINE];
     int n;
@@ -260,6 +262,30 @@ void displayReceiveMessage(int *socketfd)
             memset(recvline, 0, sizeof(recvline));
             break;
         }
+    }
+}
+void viewRooms()
+{
+    char sendline[MAXLINE], recvline[MAXLINE];
+    int n;
+
+    sprintf(sendline, "%d\n", VIEW_ROOMS_REQ);
+    send(socketfd, sendline, strlen(sendline), 0);
+
+    recv(socketfd, recvline, MAXLINE, 0);
+    int status = recvline[0] - '0';
+    if (status == SUCCESS)
+    {
+        displayListMessage(&socketfd);
+    }
+    else if (status == FAIL)
+    {
+        printf("Fail to get list Rooms!\n");
+    }
+    else
+    {
+        perror(recvline);
+        exit(4);
     }
 }
 

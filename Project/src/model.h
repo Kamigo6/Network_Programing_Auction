@@ -3,17 +3,17 @@
 
 // Structure for User
 struct User {
-    int userId;
+    int user_id;
     char name[255];
     char password[255];
-    int roomId;  // Foreign key to Room
+    int room_id;  // Foreign key to Room
 };
 
 // Structure for Room
 struct Room {
-    int roomId;
+    int room_id;
     char name[255];
-    int ownerId;  // Foreign key to User
+    int owner_id;  // Foreign key to User
 };
 
 struct RoomList {
@@ -26,15 +26,15 @@ void freeRoomList(struct RoomList *roomList);
 
 // Structure for Item
 struct Item {
-    int itemId;
+    int item_id;
     char name[255];
     char startTime[20];
     char endTime[20];
     double currentPrice;
     char state[20];
     double buyNowPrice;
-    int ownerId;  // Foreign key to User
-    int roomId;   // Foreign key to Room
+    int owner_id;  // Foreign key to User
+    int room_id;   // Foreign key to Room
 };
 
 struct ItemList {
@@ -47,10 +47,10 @@ void freeItemList(struct ItemList *itemList);
 
 // Structure for Log (bids)
 struct Log {
-    int logId;
-    int userId;    // Foreign key to User
-    int itemId;    // Foreign key to Item
-    int roomId;    // Foreign key to Room
+    int log_id;
+    int user_id;    // Foreign key to User
+    int item_id;    // Foreign key to Item
+    int room_id;    // Foreign key to Room
     double bidPrice;
     char time[20];
     char status[20];
@@ -66,9 +66,9 @@ void freeLogList(struct LogList *logList);
 
 // Structure for Room Log
 struct RoomLog {
-    int roomLogId;
-    int itemId;    // Foreign key to Item
-    int roomId;    // Foreign key to Room
+    int roomLog_id;
+    int item_id;    // Foreign key to Item
+    int room_id;    // Foreign key to Room
     char status[20];
 };
 

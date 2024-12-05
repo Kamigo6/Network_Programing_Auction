@@ -99,7 +99,8 @@ void MySQLOperations::getRoomList(struct RoomList *roomList, const string &query
                 fprintf(stderr, "Memory allocation failed.\n");
                 exit(1);
             }
-            roomList->rooms[roomListSize].roomId = res->getInt("roomId");
+            roomList->rooms[roomListSize].room_id = res->getInt("room_id");
+            roomList->rooms[roomListSize].owner_id = res->getInt("owner_id");
             strncpy(roomList->rooms[roomListSize].name, res->getString("name").c_str(), sizeof(roomList->rooms[roomListSize].name) - 1);
             roomList->rooms[roomListSize].name[sizeof(roomList->rooms[roomListSize].name) - 1] = '\0';
             roomList->size = ++roomListSize;
@@ -133,12 +134,12 @@ void MySQLOperations::getItemList(struct ItemList *itemList, const string &query
                 fprintf(stderr, "Memory allocation failed.\n");
                 exit(1);
             }
-            itemList->items[itemListSize].itemId = res->getInt("itemId");
+            itemList->items[itemListSize].item_id = res->getInt("item_id");
             strncpy(itemList->items[itemListSize].name, res->getString("name").c_str(), sizeof(itemList->items[itemListSize].name) - 1);
             itemList->items[itemListSize].name[sizeof(itemList->items[itemListSize].name) - 1] = '\0';
             itemList->items[itemListSize].currentPrice = res->getDouble("startingPrice");
             itemList->items[itemListSize].buyNowPrice = res->getDouble("buyNowPrice");
-            itemList->items[itemListSize].roomId = res->getInt("roomId");
+            itemList->items[itemListSize].room_id = res->getInt("room_id");
             itemList->size = ++itemListSize;
         }
         delete res;

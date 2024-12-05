@@ -29,6 +29,7 @@ int _register(MySQLOperations *mysqlOps, string username, string password);
 int login(MySQLOperations *mysqlOps, string username, string password, int &user_id);
 int logout(MySQLOperations *mysqlOps, string username);
 int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name);
+void viewRooms(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps);
 
 int main(int argc, char **argv)
 {
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
                 }
 
                 log_recv_msg(client_ip, client_port, buf, static_cast<UserRequest>(cmd));
-                
+
                 switch (cmd)
                 {
                 case REGISTER_REQ:
@@ -181,6 +182,22 @@ int main(int argc, char **argv)
                     }
                     break;
                 }
+                case VIEW_ROOMS_REQ:
+                {
+                    char response[50];
+                    int noargs = sscanf(buf, "%d\n", &cmd);
+                    if (noargs == 1)
+                    {
+                        viewRooms(connfd, client_ip, client_port, &mysqlOps);
+                    }
+                    else
+                    {
+                        printf("[-]Invalid view rooms protocol! %s\n", buf);
+                        sprintf(response, "Invalid view rooms protocol!\n");
+                        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_RES);
+                    }
+                    break;
+                }
                 default:
                 {
                     char response[50];
@@ -204,7 +221,9 @@ int main(int argc, char **argv)
 
 void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req)
 {
-    cout << "[+]Received message from " << client_ip << ":" << client_port << "\n" << UserRequestToString(req) << "\n" << buf.substr(2) << endl;
+    cout << "[+]Received message from " << client_ip << ":" << client_port << "\n"
+         << UserRequestToString(req) << "\n"
+         << buf.substr(2) << endl;
 }
 
 // Send header and response to client
@@ -216,7 +235,9 @@ void log_send_msg(int connfd, string client_ip, int client_port, char response[]
         perror("Send error");
         exit(1);
     }
-    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n" << ServerResponseToString(res) << "\n" << response <<  '\n';
+    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n"
+         << ServerResponseToString(res) << "\n"
+         << response << '\n';
 }
 
 // Send only response to client without header
@@ -228,7 +249,8 @@ void log_send_msg(int connfd, string client_ip, int client_port, char response[]
         perror("Send error");
         exit(1);
     }
-    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n" << response << '\n';
+    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n"
+         << response << '\n';
 }
 
 void sig_chld(int signo)
@@ -282,14 +304,14 @@ int _register(MySQLOperations *mysqlOps, string username, string password)
     string checkSql = "SELECT * FROM user WHERE name = '" + username + "';";
     cout << "SQL query: " << checkSql << '\n';
     int checkRes = (*mysqlOps).checkRecord(checkSql);
-    
+
     if (checkRes == 1)
     {
         cout << "[-]Username already exists." << endl;
         return 2;
         // Already existed
     }
-    
+
     string sql = "INSERT INTO user(name, password) VALUES ('" + username + "','" + password + "');";
     bool res = (*mysqlOps).insertRecords(sql);
     cout << "SQL query: " << sql << '\n';
@@ -305,7 +327,7 @@ int login(MySQLOperations *mysqlOps, string username, string password, int &user
     string checkSql = "SELECT * FROM user WHERE name = '" + username + "' AND loggin = 1;";
     cout << "SQL query: " << checkSql << '\n';
     int checkRes = mysqlOps->checkRecord(checkSql);
-    
+
     if (checkRes == 1)
     {
         cout << "[-]User already logged in." << endl;
@@ -348,7 +370,7 @@ int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name)
     string checkSql = "SELECT * FROM room WHERE name = '" + room_name + "';";
     cout << "SQL query: " << checkSql << '\n';
     int checkRes = mysqlOps->checkRecord(checkSql);
-    
+
     if (checkRes == 1)
     {
         cout << "[-]Room already existed." << endl;
@@ -362,4 +384,54 @@ int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name)
         return 1; // SUCCESS
     else
         return 0; // FAIL
+}
+
+void viewRooms(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps)
+{
+    string sql = "SELECT * FROM room;";
+    cout << "SQL query: " << sql << '\n';
+
+    struct RoomList roomList;
+    initRoomList(&roomList);
+    (*mysqlOps).getRoomList(&roomList, sql);
+
+    char sendline[MAXLINE], response[10];
+    char END[10] = "End";
+
+    if (!roomList.size)
+    {
+        response[0] = '0' + FAIL;
+        response[1] = '\0';
+        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_RES);
+        return;
+    }
+    else
+    {
+        printf("[+]Begin send response...\n");
+        response[0] = '0' + SUCCESS;
+        response[1] = '\0';
+        log_send_msg(connfd, client_ip, client_port, response, VIEW_ROOMS_RES);
+        // sprintf(sendline, "Number of rooms matched: %d\n", roomList.size);
+        // log_send_msg(connfd, client_ip, client_port, sendline);
+
+        send(connfd, "================================================\n", MAXLINE, 0);
+        sprintf(sendline, "%-10s | %-20s | %-10s |\n", "Room id", "Room name", "Owner id");
+        log_send_msg(connfd, client_ip, client_port, sendline);
+        memset(sendline, 0, strlen(sendline));
+        send(connfd, "-------------------------------------------------\n", MAXLINE, 0);
+        for (int i = 0; i < roomList.size; i++)
+        {
+            struct Room room = roomList.rooms[i];
+            sprintf(sendline, "%-10d | %-20s | %-10d |\n", room.room_id, room.name, room.owner_id);
+            log_send_msg(connfd, client_ip, client_port, sendline);
+            memset(sendline, 0, MAXLINE);
+        }
+        send(connfd, "================================================\n", MAXLINE, 0);
+        usleep(500000);
+        sprintf(sendline, "%s", END);
+        log_send_msg(connfd, client_ip, client_port, sendline);
+        memset(sendline, 0, strlen(sendline));
+        printf("[+]Send completely!\n");
+    }
+    freeRoomList(&roomList);
 }
