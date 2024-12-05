@@ -27,6 +27,7 @@ void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req
 void log_send_msg(int connfd, string client_ip, int client_port, char response[], ServerResponse res);
 int _register(MySQLOperations *mysqlOps, string username, string password);
 int login(MySQLOperations *mysqlOps, string username, string password);
+int logout(MySQLOperations *mysqlOps, string username);
 
 int main(int argc, char **argv)
 {
@@ -137,6 +138,25 @@ int main(int argc, char **argv)
                         printf("[-]Invalid login protocol! %s\n", buf);
                         sprintf(response, "Invalid login protocol!\n");
                         log_send_msg(connfd, client_ip, client_port, response, LOGIN_RES);
+                    }
+                    break;
+                }
+                case LOGOUT_REQ:
+                {
+                    char username[20], response[50];
+                    int noargs = sscanf(buf, "%d\n%s\n", &cmd, username);
+                    if (noargs == 2)
+                    {
+                        int result = logout(&mysqlOps, username);
+                        response[0] = '0' + result;
+                        response[1] = '\0';
+                        log_send_msg(connfd, client_ip, client_port, response, LOGOUT_RES);
+                    }
+                    else
+                    {
+                        printf("[-]Invalid logout protocol! %s\n", buf);
+                        sprintf(response, "Invalid logout protocol!\n");
+                        log_send_msg(connfd, client_ip, client_port, response, LOGOUT_RES);
                     }
                     break;
                 }
@@ -260,11 +280,43 @@ int _register(MySQLOperations *mysqlOps, string username, string password)
 
 int login(MySQLOperations *mysqlOps, string username, string password)
 {
-    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND password = '" + password + "'" +"AND login == 0;";
+    // Check if the username already exists
+    string checkSql = "SELECT * FROM user WHERE name = '" + username + "' AND loggin = 1;";
+    cout << "SQL query: " << checkSql << '\n';
+    int checkRes = (*mysqlOps).checkRecord(checkSql);
+    
+    if (checkRes == 1)
+    {
+        cout << "[-]User already logged in." << endl;
+        return 2;
+        // Already existed
+    }
+
+
+    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND password = '" + password + "';";
     cout << "SQL query: " << sql << '\n';
     int res = (*mysqlOps).checkRecord(sql);
     if (res == SUCCESS)
+    {
+        string updateSql = "UPDATE user SET loggin = 1 WHERE name = '" + username + "';";
+        (*mysqlOps).insertRecords(updateSql);
+        return 1; // SUCCESS
+    }
+    else
+        return 0; // Wrong username or password
+}
+
+int logout(MySQLOperations *mysqlOps, string username)
+{
+    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND loggin = 1;";
+    cout << "SQL query: " << sql << '\n';
+    int res = (*mysqlOps).checkRecord(sql);
+    if (res == SUCCESS)
+    {
+        string updateSql = "UPDATE user SET loggin = 0 WHERE name = '" + username + "';";
+        (*mysqlOps).insertRecords(updateSql);
         return SUCCESS;
+    }
     else
         return FAIL;
 }

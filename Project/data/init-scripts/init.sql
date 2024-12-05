@@ -7,7 +7,7 @@ CREATE TABLE user (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    longin BOOLEAN NOT NULL DEFAULT 0,
+    loggin BOOLEAN NOT NULL DEFAULT 0,
     room_id INT
 );
 

@@ -26,7 +26,7 @@ void bookTicket();
 void reserve(int showtimeId, int movieId);
 bool isInteger(const string &s);
 bool isValidTicketFormat(string tickets);
-void logout();
+void logout(string username);
 
 int main(int argc, char **argv)
 {
@@ -139,7 +139,7 @@ void displayUserMenu(string *username)
     case '3':
         break;
     case '4':
-        logout();
+        logout(*username);
         break;
     default:
         printf("Invalid choice. Try again.\n");
@@ -205,23 +205,40 @@ int login(string *user)
     {
         printf("You have logged in successfully!\n");
         *user = username;
+        return 1;
     }
     else if (status == FAIL)
     {
         printf("Wrong username or password!!!\n");
+    }
+    else if (status == 2)
+    {
+        printf("User already logged in!\n");
     }
     else
     {
         perror(recvline);
         exit(4);
     }
-    return status;
+    return 0;
 }
 
-void logout()
+void logout(string username)
 {
-    loggedIn = 0;
-    printf("Logged out successfully.\n\n");
+    char sendline[MAXLINE], recvline[MAXLINE];
+    sprintf(sendline, "%d\n%s\n", LOGOUT_REQ, username.c_str());
+    send(socketfd, sendline, strlen(sendline), 0);
+    recv(socketfd, recvline, MAXLINE, 0);
+    int status = recvline[0] - '0';
+    if (status == SUCCESS)
+    {
+        loggedIn = 0;
+        printf("Logged out successfully.\n\n");
+    }
+    else
+    {
+        printf("Logout failed!!!\n");
+    }
 }
 
 void displayReceiveMessage(int *socketfd)
