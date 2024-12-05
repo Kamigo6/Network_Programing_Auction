@@ -163,9 +163,10 @@ int main(int argc, char **argv)
 
 void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req)
 {
-    cout << "[+]Received message from " << client_ip << ":" << client_port << "\n" << UserRequestToString(req) << "\n" << buf << endl;
+    cout << "[+]Received message from " << client_ip << ":" << client_port << "\n" << UserRequestToString(req) << "\n" << buf.substr(2) << endl;
 }
 
+// Send header and response to client
 void log_send_msg(int connfd, string client_ip, int client_port, char response[], ServerResponse res)
 {
     int n = send(connfd, response, MAXLINE, 0);
@@ -175,6 +176,18 @@ void log_send_msg(int connfd, string client_ip, int client_port, char response[]
         exit(1);
     }
     cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n" << ServerResponseToString(res) << "\n" << response <<  '\n';
+}
+
+// Send only response to client without header
+void log_send_msg(int connfd, string client_ip, int client_port, char response[])
+{
+    int n = send(connfd, response, MAXLINE, 0);
+    if (n < 0)
+    {
+        perror("Send error");
+        exit(1);
+    }
+    cout << "[+]Sent message to " << client_ip << ":" << client_port << "\n" << response << '\n';
 }
 
 void sig_chld(int signo)

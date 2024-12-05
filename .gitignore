@@ -1,4 +1,4 @@
-vscode
+.vscode
 # sample executed files
 Project/src/dbConnector/test_ConnectDB
 Project/src/dbConnector/test_mysql
