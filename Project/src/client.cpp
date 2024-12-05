@@ -12,12 +12,12 @@
 
 using namespace std;
 
-int socketfd, loggedIn;
+int socketfd, loggedIn, user_id;
 
 void connectToServer(char *ip);
 void displayMenu();
 void displayUserMenu(string *username);
-int login(string *username);
+int login(string *username, int &user_id);
 void _register();
 void displayReceiveMessage(int *socketfd);
 void searchMovie();
@@ -92,7 +92,7 @@ void displayMenu()
                 break;
 
             case '2':
-                loggedIn = login(&username);
+                loggedIn = login(&username, user_id);
                 break;
 
             case '3':
@@ -120,10 +120,10 @@ void displayMenu()
 
 void displayUserMenu(string *username)
 {
-    cout << "Account: " << *username << "\n ============Main Menu============\n";
+    cout << "Account: " << *username << "; ID: "<< user_id << "\n ============Main Menu============\n";
     printf("1. View rooms\n");
-    printf("2. View items\n");
-    printf("3. View log\n");
+    printf("2. Create room\n");
+    printf("3. View rooms owned\n");
     printf("4. Logout\n");
     printf("Enter your choice: ");
 
@@ -183,10 +183,9 @@ void _register()
     }
 }
 
-int login(string *user)
+int login(string *user, int &user_id)
 {
     char username[30], password[30];
-    // string username, password;
     char sendline[MAXLINE], recvline[MAXLINE];
 
     cout << "Enter your username: ";
@@ -200,11 +199,13 @@ int login(string *user)
     send(socketfd, sendline, strlen(sendline), 0);
 
     recv(socketfd, recvline, MAXLINE, 0);
-    int status = recvline[0] - '0';
+    int status, id;
+    sscanf(recvline, "%d %d", &status, &id);
     if (status == SUCCESS)
     {
         printf("You have logged in successfully!\n");
         *user = username;
+        user_id = id;
         return 1;
     }
     else if (status == FAIL)

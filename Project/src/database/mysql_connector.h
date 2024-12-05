@@ -41,6 +41,8 @@ public:
     bool placeBid(const string& query);   // Insert new bids into the log table
     bool updateItemPrice(int itemId, const string& query);  // Update current price of an item
     bool updateRoomLogStatus(int roomLogId, const string& query); // Update the room_log status
+
+    sql::ResultSet* executeQuery(const string& query);
 };
 
 #endif // MYSQL_AUCTION_OPERATIONS_H

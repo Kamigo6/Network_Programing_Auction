@@ -65,6 +65,19 @@ bool MySQLOperations::insertRecords(const string &insertQuery)
     return false;
 }
 
+sql::ResultSet* MySQLOperations::executeQuery(const string &query)
+{
+    try
+    {
+        return stmt->executeQuery(query);
+    }
+    catch (SQLException &e)
+    {
+        cerr << "Error executing query: " << e.what() << endl;
+        return nullptr;
+    }
+}
+
 void MySQLOperations::getRoomList(struct RoomList *roomList, const string &query)
 {
     try
