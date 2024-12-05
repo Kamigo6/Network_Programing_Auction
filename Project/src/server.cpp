@@ -28,6 +28,7 @@ void log_send_msg(int connfd, string client_ip, int client_port, char response[]
 int _register(MySQLOperations *mysqlOps, string username, string password);
 int login(MySQLOperations *mysqlOps, string username, string password, int &user_id);
 int logout(MySQLOperations *mysqlOps, string username);
+int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name);
 
 int main(int argc, char **argv)
 {
@@ -157,6 +158,26 @@ int main(int argc, char **argv)
                         printf("[-]Invalid logout protocol! %s\n", buf);
                         sprintf(response, "Invalid logout protocol!\n");
                         log_send_msg(connfd, client_ip, client_port, response, LOGOUT_RES);
+                    }
+                    break;
+                }
+                case CREATE_ROOM_REQ:
+                {
+                    char room_name[255], response[50];
+                    int user_id;
+                    int noargs = sscanf(buf, "%d\n%d %s\n", &cmd, &user_id, room_name);
+                    if (noargs == 3)
+                    {
+                        int result = createRoom(&mysqlOps, user_id, room_name);
+                        response[0] = '0' + result;
+                        response[1] = '\0';
+                        log_send_msg(connfd, client_ip, client_port, response, CREATE_ROOM_RES);
+                    }
+                    else
+                    {
+                        printf("[-]Invalid create room protocol! %s\n", buf);
+                        sprintf(response, "Invalid create room protocol!\n");
+                        log_send_msg(connfd, client_ip, client_port, response, CREATE_ROOM_RES);
                     }
                     break;
                 }
@@ -319,4 +340,26 @@ int logout(MySQLOperations *mysqlOps, string username)
     }
     else
         return FAIL;
+}
+
+int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name)
+{
+    // Check if the room already exists
+    string checkSql = "SELECT * FROM room WHERE name = '" + room_name + "';";
+    cout << "SQL query: " << checkSql << '\n';
+    int checkRes = mysqlOps->checkRecord(checkSql);
+    
+    if (checkRes == 1)
+    {
+        cout << "[-]Room already existed." << endl;
+        return 2;
+        // Already existed
+    }
+    string sql = "INSERT INTO room(name, owner_id) VALUES ('" + room_name + "'," + to_string(user_id) + ");";
+    bool res = mysqlOps->insertRecords(sql);
+    cout << "SQL query: " << sql << '\n';
+    if (res)
+        return 1; // SUCCESS
+    else
+        return 0; // FAIL
 }

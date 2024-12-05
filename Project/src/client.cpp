@@ -27,6 +27,7 @@ void reserve(int showtimeId, int movieId);
 bool isInteger(const string &s);
 bool isValidTicketFormat(string tickets);
 void logout(string username);
+void createRoom();
 
 int main(int argc, char **argv)
 {
@@ -135,6 +136,7 @@ void displayUserMenu(string *username)
     case '1':
         break;
     case '2':
+        createRoom();
         break;
     case '3':
         break;
@@ -258,5 +260,39 @@ void displayReceiveMessage(int *socketfd)
             memset(recvline, 0, sizeof(recvline));
             break;
         }
+    }
+}
+
+void createRoom()
+{
+    char room_name[255];
+    char sendline[MAXLINE], recvline[MAXLINE];
+
+    cout << "Enter room name: ";
+    cin >> room_name;
+
+    // store values in sendline
+    sprintf(sendline, "%d\n%d %s\n", CREATE_ROOM_REQ, user_id, room_name);
+    // send request to server with protocol: "CREATE_ROOM\n<user_id> <room_name>\n"
+    send(socketfd, sendline, strlen(sendline), 0);
+
+    recv(socketfd, recvline, MAXLINE, 0);
+    int status = recvline[0] - '0';
+    if (status == 1) // SUCCESS
+    {
+        printf("Room created successfully!\n");
+    }
+    else if (status == 0) // FAIL
+    {
+        printf("Room creation failed!!!\n");
+    }
+    else if (status == 2) // Already existed
+    {
+        printf("Room name already existed!!!\n");
+    }
+    else
+    {
+        perror(recvline);
+        exit(4);
     }
 }
