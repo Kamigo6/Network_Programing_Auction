@@ -27,7 +27,7 @@ void log_recv_msg(string client_ip, int client_port, string buf, UserRequest req
 void log_send_msg(int connfd, string client_ip, int client_port, char response[], ServerResponse res);
 int _register(MySQLOperations *mysqlOps, string username, string password);
 int login(MySQLOperations *mysqlOps, string username, string password, int &user_id);
-int logout(MySQLOperations *mysqlOps, string username);
+int logout(MySQLOperations *mysqlOps, int user_id);
 int createRoom(MySQLOperations *mysqlOps, int user_id, string room_name);
 void viewRooms(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps);
 void viewRoomsOwned(int connfd, string client_ip, int client_port, MySQLOperations *mysqlOps, int user_id);
@@ -146,11 +146,12 @@ int main(int argc, char **argv)
                 }
                 case LOGOUT_REQ:
                 {
-                    char username[20], response[50];
-                    int noargs = sscanf(buf, "%d\n%s\n", &cmd, username);
+                    int user_id;
+                    char response[50];
+                    int noargs = sscanf(buf, "%d\n%d\n", &cmd, &user_id);
                     if (noargs == 2)
                     {
-                        int result = logout(&mysqlOps, username);
+                        int result = logout(&mysqlOps, user_id);
                         response[0] = '0' + result;
                         response[1] = '\0';
                         log_send_msg(connfd, client_ip, client_port, response, LOGOUT_RES);
@@ -367,14 +368,14 @@ int login(MySQLOperations *mysqlOps, string username, string password, int &user
         return 0; // Wrong username or password
 }
 
-int logout(MySQLOperations *mysqlOps, string username)
+int logout(MySQLOperations *mysqlOps, int user_id)
 {
-    string sql = "SELECT * FROM user WHERE name = '" + username + "' AND loggin = 1;";
+    string sql = "SELECT * FROM user WHERE user_id = " + to_string(user_id) + " AND loggin = 1;";
     cout << "SQL query: " << sql << '\n';
     int res = (*mysqlOps).checkRecord(sql);
     if (res == SUCCESS)
     {
-        string updateSql = "UPDATE user SET loggin = 0 WHERE name = '" + username + "';";
+        string updateSql = "UPDATE user SET loggin = 0 WHERE user_id = " + to_string(user_id) + ";";
         (*mysqlOps).insertRecords(updateSql);
         return SUCCESS;
     }

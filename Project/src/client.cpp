@@ -233,7 +233,7 @@ int login(string *user, int &user_id)
 void logout(string username)
 {
     char sendline[MAXLINE], recvline[MAXLINE];
-    sprintf(sendline, "%d\n%s\n", LOGOUT_REQ, username.c_str());
+    sprintf(sendline, "%d\n%d\n", LOGOUT_REQ, user_id);
     send(socketfd, sendline, strlen(sendline), 0);
     recv(socketfd, recvline, MAXLINE, 0);
     int status = recvline[0] - '0';
